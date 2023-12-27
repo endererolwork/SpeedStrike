@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine;
 
 namespace Race
@@ -9,8 +10,12 @@ namespace Race
         [SerializeField]
         int maxMana = 5;
 
+
+        [SerializeField]
         int currentMana = 0;
 
+        [SerializeField]
+        AudioSource BoomSound;
         //------
         readonly int manaCostForExplosion = 3;
         public bool explosionActive = false;
@@ -22,15 +27,30 @@ namespace Race
         float scaleSkillActiveTimeCounter = 0;
         readonly float scaleSkillCooldown = 10;
 
+        [SerializeField]
+        TMPro.TMP_Text ManaText; 
+
+        [SerializeField]
+        TMPro.TMP_Text CooldownText; 
+
         // Start is called before the first frame update
         void Start()
         {
-        
         }
 
         // Update is called once per frame
         void Update()
         {
+            if (ManaText != null)
+            { 
+                ManaText.text = currentMana.ToString();
+            }
+            if (CooldownText != null)
+            {
+                CooldownText.text = (10.0f - scaleSkillCooldownCounter).ToString();
+            }
+
+            //if () color for explosion
             if (scaleIncrease && scaleDecrease) { Debug.LogError("This really shouldnt happen"); }
             else if (scaleIncrease) 
             {
@@ -85,5 +105,32 @@ namespace Race
 
 
         }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            GameObject colGO = collision.gameObject;
+            if (colGO.CompareTag("Player") && !collision.gameObject.Equals(this.gameObject) && explosionActive)
+            {
+                collision.gameObject.GetComponent<SkillControls>().Explode();
+                explosionActive = false;
+            }
+        }
+        public void IncrementMana(int amount)
+        {
+            currentMana += amount;
+            if (currentMana > maxMana)
+            {
+                currentMana = maxMana;
+            }
+        }
+
+
+        private void Explode()
+        {
+            BoomSound.Play();
+            Destroy(gameObject);
+        }
     }
+
+    
 }
